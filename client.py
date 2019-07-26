@@ -1,73 +1,52 @@
-import json, socket
-import time
+import yaml
+import socket
+import json
+from datetime import datetime
+from argparse import ArgumentParser
 
-class Client(object):
-    socket = None
+parser = ArgumentParser()
 
-    def __del__(self):
-        self.close()
+parser.add_argument(
+    '-c', '--config', type=str, required=False,
+    help='sets config file path'
+)
 
-    def connect(self, host, port):
-        self.socket = socket.socket()
-        self.socket.connect((host, port))
-        return self
+args = parser.parse_args()
 
-    def send(self, data):
-        if not self.socket:
-            raise Exception('необходимо подключиться перед отправкой')
-        _send(self.socket, data)
-        return self
+config = {
+    'host': 'localhost',
+    'port': 8000,
+    'buffersize': 1024
+}
 
-    def recv(self):
-        if not self.socket:
-            raise Exception('необходимо подключиться перед получением')
-        return _recv(self.socket)
+if args.config:
+    with open(args.config) as file:
+        file_config = yaml.load(file, Loader=yaml.Loader)
+        config.update(file_config)
 
-    def recv_and_close(self):
-        data = self.recv()
-        self.close()
-        return data
+host, port = config.get('host'), config.get('port')
 
-    def close(self):
-        if self.socket:
-            self.socket.close()
-            self.socket = None
+try:
+    sock = socket.socket()
+    sock.connect((host, port))
+    print('client started')
+    
+    action = input('enter action: ')
+    data = input('enter data: ')
 
-def _send(socket, data):
-    try:
-        serialized = json.dumps(data)
-    except (TypeError, ValueError):
-        raise Exception('возможна отправка только json форматов')
-    socket.send('%d\n' % len(serialized))
-    socket.sendall(serialized)
+    request = {
+        'action': action,
+        'time': datetime.now().timestamp(),
+        'data': data,
+    }
 
-def _recv(socket):
-    length_str = ''
-    char = socket.recv(1)
-    while char != '\n':
-        length_str += char
-        char = socket.recv(1)
-    total = int(length_str)
-    view = memoryview(bytearray(total))
-    next_offset = 0
-    while total - next_offset > 0:
-        recv_size = socket.recv_into(view[next_offset:], total - next_offset)
-        next_offset += recv_size
-    try:
-        deserialized = json.loads(view.tobytes())
-    except (TypeError, ValueError):
-        raise Exception('данные получены не в формате json')
-    return deserialized
+    str_request = json.dumps(request)
 
-host = 'localhost'
-port = 8080
+    sock.send(str_request.encode())
+    print(f'client sends data { data }')
 
-i=1
-while True:
-	client = Client()
-	client.connect(host, port).send({'test':i})
-	i+=1
-	response = client.recv()
-	print(response)
-	client.close()
-	time.sleep(1)
+    b_response = sock.recv(config.get('buffersize'))
+    print(f'server send data { b_response.decode() }')
+
+except KeyboardInterrupt:
+    print('client shutdown')
