@@ -4,7 +4,7 @@ from functools import wraps
 
 logger = logging.getLogger('decorators')
 
-
+@log
 def logged(func):
     def wrapper(request, *args, **kwargs):
         logger.debug(f'{func.__name__}: {request}')
