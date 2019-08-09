@@ -26,39 +26,29 @@ def initial_request(expected_action, expected_data):
 
 '''
 # in case textures are not ised
-
 ACTION = 'test'
-
 CODE = 200
-
 DATA = 'some data'
-
-
 REQUEST = {
     'action': ACTION,
     'time': datetime.now().timestamp(),
     'data': DATA,
 }
-
 RESPONSE = {
     'action': ACTION,
     'time': datetime.now().timestamp(),
     'code': 200,
     'data': DATA,
 }
-
 def test_action_make_reponse():
     actual_response = make_response(REQUEST, CODE, DATA)
     assert actual_response.get('action') == ACTION
-
 def test_code_make_reponse():
     actual_response = make_response(REQUEST, CODE, DATA)
     assert actual_response.get('code') == CODE
-
 def test_data_make_reponse():
     actual_response = make_response(REQUEST, CODE, DATA)
     assert actual_response.get('data') == DATA
-
 '''
 
 def test_action_make_reponse(initial_request, expected_action, expected_code, expected_data):

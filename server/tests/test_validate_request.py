@@ -37,4 +37,3 @@ def test_valid_validate_request(valid_request):
 def test_invalid_validate_request(invalid_request):
     is_valid = validate_request(invalid_request)
     assert not is_valid
-
