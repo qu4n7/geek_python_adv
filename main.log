@@ -1,0 +1,17 @@
+2019-08-05 19:44:48,699 - INFO - Server started with localhost:8000
+2019-08-05 19:45:10,771 - INFO - Client was detected 127.0.0.1:51111
+2019-08-05 19:46:12,229 - INFO - Server started with localhost:8000
+2019-08-05 19:46:17,921 - INFO - Client was detected 127.0.0.1:51117
+2019-08-05 19:46:23,539 - INFO - Client send valid request {'action': 'echo', 'time': 1565023583.492836, 'data': 'test'}
+2019-08-05 19:46:23,540 - DEBUG - get_echo: {'action': 'echo', 'time': 1565023583.492836, 'data': 'test'}
+2019-08-06 09:35:14,551 - INFO - Server started with localhost:8000
+2019-08-06 09:35:44,457 - INFO - Client was detected 127.0.0.1:52526
+2019-08-06 09:35:51,732 - INFO - Client send valid request {'action': 'echo', 'time': 1565073351.720213, 'data': 'test'}
+2019-08-06 09:35:51,736 - DEBUG - get_echo: {'action': 'echo', 'time': 1565073351.720213, 'data': 'test'}
+2019-08-06 09:42:34,733 - INFO - Server started with localhost:8000
+2019-08-06 09:42:56,603 - INFO - Client was detected 127.0.0.1:52584
+2019-08-06 09:43:03,457 - INFO - Client send valid request {'action': 'echo', 'time': 1565073783.449903, 'data': 'some'}
+2019-08-06 09:43:03,457 - DEBUG - get_echo: {'action': 'echo', 'time': 1565073783.449903, 'data': 'some'}
+2019-08-09 13:55:52,503 - INFO - server started with localhost:8000
+2019-08-09 13:56:42,167 - INFO - server started with localhost:8000
+2019-08-09 14:00:42,732 - INFO - server started with localhost:8000

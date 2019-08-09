@@ -1,10 +1,13 @@
 import yaml
 import socket
 import json
+import logging
+import select
 from argparse import ArgumentParser
 
 from actions import resolve
 from protocol import validate_request, make_response
+from handlers import handle_default_request
 
 
 parser = ArgumentParser()
@@ -29,42 +32,52 @@ if args.config:
         file_config = yaml.load(file, Loader=yaml.Loader)
         config.update(file_config)
 
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers = [
+        logging.FileHandler('main.log'),
+        logging.StreamHandler(),
+    ]
+)
+
+requests = []
+connections = []
+
 host, port = config.get('host'), config.get('port')
 
 try:
     sock = socket.socket()
     sock.bind((host, port))
+    sock.setblocking(False)
+    sock.settimeout(0)
     sock.listen(5)
 
-    print(f'Server started with { host }:{ port }')
+    logging.info(f'server started with { host }:{ port }')
 
     while True:
-        client, address = sock.accept()
-        print(f'Client was detected { address[0] }:{ address[1] }')
+        try:
+            client, address = sock.accept()
+            logging.info(f'client detected { address[0] }:{ address[1] }')
+            connections.append(client) 
+        except:
+            pass
 
-        b_request = client.recv(config.get('buffersize'))
+        rlist, wlist, xlist = select.select(
+            connections, connections, connections, 0
+        )
 
-        request = json.loads(b_request.decode())
-        
-        if validate_request(request):
-            actions_name = request.get('action')
-            controller = resolve(actions_name)
-            if controller:
-                try:
-                    print(f'Client send valid request {request}')
-                    response = controller(request)
-                except Exception as err:
-                    print(f'Internal server error: {err}')
-                    response = make_response(request, 500, data='Internal server error')
-            else:
-                print(f'Controller with action name {actions_name} does not exists')
-                response = make_response(request, 404, 'Action not found')
-        else:
-            print(f'Client send invalid request {request}')
-            response = make_response(request, 404, 'Wrong request')
+        for read_client in rlist:
+            bytes_request = read_client.recv(config.get('buffersize'))
+            requests.append(bytes_request)
 
-        str_response = json.dumps(response)
-        client.send(str_response.encode())
+        if requests:
+            bytes_request = requests.pop()
+            bytes_response = handle_default_request(bytes_request)
 
+            for write_client in wlist:
+                write_client.send(bytes_response)
+
+ 
 except KeyboardInterrupt:
-    print('Server shutdown.')
+    print('Server shutdown')
